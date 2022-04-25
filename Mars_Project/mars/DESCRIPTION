@@ -1,0 +1,25 @@
+Package: mars
+Title: Multiple Adaptive Regression Spline
+Version: 0.0.0.9000
+Authors@R: 
+    person("Gareth", "Bennett", "garethb@sfu.ca",comment = c(ORCID = "301335695"))
+    person("Heewon", "Oh",comment = c(ORCID = "301268860"))
+    person("Jusung", "Lee",comment = c(ORCID = "301309867"))
+    person("First", "Last", , "first.last@example.com", role = c("aut", "cre"),
+           comment = c(ORCID = "YOUR-ORCID-ID"))
+Description: Implimentation of Friedman's Multiple Adaptive Regression Spline (MARS) model.
+Maintainer: Gareth Bennett <garethb@sfu.ca>
+License: GPL (>= 3)
+Encoding: UTF-8
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.1.2
+Imports: stats
+Suggests: 
+    knitr,
+    rmarkdown,
+    testthat (>= 3.0.0)
+VignetteBuilder: knitr
+Config/testthat/edition: 3
+Depends: 
+    R (>= 2.10)
+LazyData: true

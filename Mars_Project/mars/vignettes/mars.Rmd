@@ -1,0 +1,132 @@
+---
+title: "Multivariate Adaptive Regression Splines (MARS)"
+Authors: Gareth Bennett, Jusung Lee, Heewon Oh
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Multivariate Adaptive Regression Splines (MARS)}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+
+```
+
+## Getting started
+
+Install the package.
+Load the package
+```{r setup}
+library(mars)
+```
+
+
+  
+## Introduction
+
+The MARS package is designed to solve complex non-linear regression problems using recursive partitioning as defined in Friedman's paper, Multivariate Adaptive Regression Splines (1991).
+
+
+The acronym 'MARS' stands for Multivariate Adaptive Regression Splines and is technically trademarked. However, seeing as this package will not be publicly released, we hope for forgiveness in this infringement. 
+
+  
+## The MARS algorithm 
+
+The MARS function attempts to fit non-linear data as accurately as possible. To do this the function defines one or more hinge-points that act as connectors between two or more linear functions (thus piecewise functions). This process is completed through a multistage process including a forward pass, and backwards pass. The MARS function takes a formula,a set of data, and a control value as input.
+
+### Forward pass
+
+  The forward pass algorithm takes a formula and data as input and attempts to output a matrix of basis functions of size Mmax. To do this, the algorithm considers each data point for each predictor and generates candidate basis function pairs. These candidates are selected based on their reduction to the model's residual sum-of-squares. The basis function matrix contains a row for each observations and a column for each basis function.
+
+
+### Backwards pass
+
+The forward pass identifies every basis function that reduces the model's residual sum-of-squares, but this method has a high risk of producing an over-fit model. To create a model that generalized better with new data, the matrix is handed to the backwards pass algorithm. The algorithm 'prunes' any basis function that adds no significant predictive accuracy to the overall model.
+
+The backwards algorithm compares subsets of basis function using generalized cross-validation scores, in which 'd' controls the amount of penalization there is for extra model terms. By tracking GCV scores for each possible combination of basis function, the best possible model can be selected.The backwards pass algorithm then updates the basis matrix to contain only the functions from the optimal model. 
+
+Note
+  : Generalized cross-validation is a approximation of true cross-validation score. This feature imposes a penalty on model complexity due to the decreased generalization ability of larger models. 
+
+
+
+## Preparing inputs 
+
+There are two required and one optional input
+
+1. An R formula to specify response and explanatory variables (required)
+2. A data frame containing your data. For this example we will use the mtcars data from the `stats` package (required). Using this ample dataset, we will fit a model to predict miles per gallon (mpg) using predictors; vehicle weight(wt) and horsepower(hp).
+
+```{r}
+library(stats); data(mtcars)
+form <- formula(mpg~ wt+hp)
+```
+3. mars.control object (optional). This can be used to specify up to three model fitting parameters 
+    1. `Mmax` determines how many basis functions the algorithm should construct, the default value is 2.
+    2. `d` represents a cost for each basis function optimization and acts as a smoothing parameter. Greater values result in smoother                functions,the default value is 3.
+    3. `trace` activates a verbose output, the default value is TRUE
+
+```{r}
+mc <- mars.control(Mmax=10)
+```
+
+
+
+## Calling mars()
+
+```{r}
+mm <- mars(form, mtcars, mc)
+```
+
+
+## Using mars methods
+
+### Predict():
+Takes new data and a mars object as input and returns the predicted corresponding basis functions based on the mars object. 
+```{r}
+mc_predict <- mars.control(Mmax=2)
+data <- mtcars[c("mpg", "wt", "hp")]
+
+# split data to pass into mars
+mtcars_mars <- mars(form, data[1:30,], mc_predict)
+# Pass in mars object with no new data will return mtcars_mars$B
+predict(mtcars_mars)
+# Pass in mars object with new data
+# get corresponding matrix of basis functions on new data
+predict(mtcars_mars, data[31:32,])
+```
+
+### Plot():
+Plots the fitted basis functions that depend on explanatory variable(main effects) or two explanatory variables (two-way interactions). 
+
+Use `predict.lm()` to see the residual plots.
+```{r}
+plot(mm,col="red")
+```
+
+### Summary():
+Summary method for class "mars". Prints a summary of hinges that make up each basis function in the optimal model, along with the coefficient of said basis functions.
+Takes a mars object
+returns a summary of the mars object
+```{r}
+summary(mm)
+```
+
+### Print():
+Prints a given mars object.
+```{r}
+print(mm)
+```
+
+
+
+
+## References
+
+Jerome H. Friedman. Multivariate Adaptive Regression Splines (with discussion).
+Annals of Statistics 19/1, 1991. https://statistics.stanford.edu/research/
+multivariate-adaptive-regression-splines.
